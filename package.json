@@ -1,0 +1,19 @@
+{
+  "name": "testgulp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "gulp": "gulp"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-rm": "^2.0.0"
+  },
+  "dependencies": {
+    "jquery": "^3.6.1"
+  }
+}
