@@ -2,12 +2,14 @@ ymaps.ready(init);
 
 // Массив объектов
 var placemarks = [];
+if(localStorage.getItem('PlacemarkArray') != null) {
+  placemarks = JSON.parse(localStorage.getItem('PlacemarkArray'));
+}
 
 // Создание карты и геометок
 var geoObjects = [];
 var coords;
-var map2;
-
+var b;
 
 function init() {
   var map = new ymaps.Map("map", {
@@ -19,7 +21,7 @@ function init() {
     }),
 
     BalloonContentLayout = ymaps.templateLayoutFactory.createClass(
-      '<ul class = "reviews"> ' +
+      '<ul style = "overflow:scroll" class = "reviews"> ' +
       '<li><b>{{properties.name}}:</b> {{properties.place}}<br>{{properties.comment}}</li>' +
       '</ul>' +
       '<div class="form">' +
@@ -46,7 +48,6 @@ function init() {
     '</form>' +
     '</div>', {
   });
-  map2 = map;
   var mapBalloonClick = function (e) {
     e.preventDefault();
     console.log("mapBalloonClick");
@@ -59,24 +60,7 @@ function init() {
     var data = [];
     let i;
     var placemark;
-    // for(i = 0; i < map.geoObjects.getLength(); i++) {
-    //   if(map2.geoObjects.get(i) instanceof ymaps.Placemark === true && map.geoObjects.get(i).geometry._coordinates[0] === coords[0] && map.geoObjects.get(i).geometry._coordinates[1] === coords[1]) {
-    //     break;
-    //   }
-    // }
-    // if(i != map.geoObjects.getLength()) { // если мы нашли плейсмарку с такими же координатами
-    //     placemark = map.geoObjects.get(i);
-
-    //     data = placemark.properties.get('data');
-    //     data.push(props);
-    //     //placemark.properties.set('data', data);
-    //     placemark.properties.set('name', props.name);
-    //     placemark.properties.set('place', props.place);
-    //     placemark.properties.set('comment', props.comment);
-    //     data.length;//это наша цифра в кругляше
-
-    // }
-    // else { // создаем новую плейсмарку
+    // создаем новую плейсмарку
     data.push(props);
     placemark = new ymaps.Placemark(coords, {
       //data: data,
@@ -88,9 +72,24 @@ function init() {
         balloonContentLayout: BalloonContentLayout,
         balloonPanelMaxMapArea: 0
       });
-    //map.geoObjects.add(placemark);//добавляем плейсмарку на карту
+    //добавляем плейсмарку
     clusterer.add(placemark);
-    // } //end else
+
+    let placemarkArray = [];
+
+    if (localStorage.getItem('PlacemarkArray') != null) {
+      placemarkArray = JSON.parse(localStorage.getItem('PlacemarkArray'));
+    }
+
+    placemarkArray.push(JSON.stringify({
+      coords: JSON.stringify(coords),
+      name: props.name,
+      place: props.place,
+      comment: props.comment
+    }));
+
+    localStorage.setItem('PlacemarkArray', JSON.stringify(placemarkArray));
+
     map.balloon.close();//закрываем балун
   };
 
@@ -123,6 +122,9 @@ function init() {
   //Обрабатываем октрытие балуна при клике на карту
   map.events.add('balloonopen', function (e) {
     map.hint.close();//закрываем подсказку
+    if(e.get('target').geometry != undefined) {
+      coords = e.get('target').geometry.getCoordinates();
+    }
     console.log("balloonopen");
     document.querySelector('#form__button').onclick = mapBalloonClick;//добавляем обраточик на кнопку "Добавить"
   });
@@ -132,13 +134,23 @@ function init() {
     {
       clusterBalloonContentLayout: clustererBalloonContentLayout,
       clusterDisableClickZoom: true,
-      // gridSize: 512,
+      gridSize: 512,
+      // maxZoom: 10,
       groupByCoordinates: true,
     }
   );
-
+  for(let i = 0; i < placemarks.length; i++) {
+    let s = JSON.parse(placemarks[i]);
+    clusterer.add(new ymaps.Placemark(JSON.parse(s.coords), {
+      name: s.name,
+      place: s.place,
+      comment: s.comment
+    },//создаем плейсмарку
+      {
+        balloonContentLayout: BalloonContentLayout,
+        balloonPanelMaxMapArea: 0
+      }));
+  }
   // Добавление объектов на карту
   map.geoObjects.add(clusterer);
-  //map.geoObjects.add(placemarkBaloon);
-  // clusterer.add(geoObjects);
 }

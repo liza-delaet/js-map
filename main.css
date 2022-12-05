@@ -24,7 +24,8 @@
 .form {
   display: flex;
   flex-direction: column;
-  width: 310px;
+  min-width: 310px;
+  max-width: 350px;
   gap: 10px;
 }
 
@@ -60,4 +61,10 @@
   height: 38px;
   border: none;
   padding: 10px;
+}
+
+.reviews {
+  overflow: scroll;
+  max-width: 350px;
+  max-height: 300px;
 }
