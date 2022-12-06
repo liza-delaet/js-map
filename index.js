@@ -2,14 +2,13 @@ ymaps.ready(init);
 
 // Массив объектов
 var placemarks = [];
-if(localStorage.getItem('PlacemarkArray') != null) {
+if(localStorage.getItem('PlacemarkArray') !== null) {
   placemarks = JSON.parse(localStorage.getItem('PlacemarkArray'));
 }
 
 // Создание карты и геометок
 var geoObjects = [];
 var coords;
-var b;
 
 function init() {
   var map = new ymaps.Map("map", {
@@ -21,33 +20,33 @@ function init() {
     }),
 
     BalloonContentLayout = ymaps.templateLayoutFactory.createClass(
-      '<ul style = "overflow:scroll" class = "reviews"> ' +
-      '<li><b>{{properties.name}}:</b> {{properties.place}}<br>{{properties.comment}}</li>' +
-      '</ul>' +
-      '<div class="form">' +
-      '<form class="form" id="form">' +
-      '<h1 class="form__title">Отзыв:</h1>' +
-      '<input type="text" class="form__input" name="name" placeholder="Укажите ваше имя">' +
-      '<input type="text" class="form__input" name="place" placeholder="Укажите место">' +
-      '<textarea class="form__input form__input--textarea" name="comment" placeholder="Оставить отзыв"></textarea>' +
-      '<button type="submit" class="form__button" id="form__button">Добавить</button>' +
-      '</form>' +
-      '</div>', {
-    });
+      `<ul style = "overflow:scroll" class = "reviews">
+      <li><b>{{properties.name}}:</b> {{properties.place}}<br>{{properties.comment}}</li>
+      </ul>
+      <div class="form">
+      <form class="form" id="form">
+      <h1 class="form__title">Отзыв:</h1>
+      <input type="text" class="form__input" name="name" placeholder="Укажите ваше имя">
+      <input type="text" class="form__input" name="place" placeholder="Укажите место">
+      <textarea class="form__input form__input--textarea" name="comment" placeholder="Оставить отзыв"></textarea>
+      <button type="submit" class="form__button" id="form__button">Добавить</button>
+      </form>
+      </div>`
+      );
   var clustererBalloonContentLayout = ymaps.templateLayoutFactory.createClass(
-    '<ul class = "reviews"> ' +
-    '{% for geoObject in properties.geoObjects %}<li><b>{{geoObject.properties.name}}</b>: {{geoObject.properties.place}}<br> {{geoObject.properties.comment}}</li>{% endfor %}' +
-    '</ul>' +
-    '<div class="form">' +
-    '<form class="form" id="form">' +
-    '<h1 class="form__title">Отзыв:</h1>' +
-    '<input type="text" class="form__input" name="name" placeholder="Укажите ваше имя">' +
-    '<input type="text" class="form__input" name="place" placeholder="Укажите место">' +
-    '<textarea class="form__input form__input--textarea" name="comment" placeholder="Оставить отзыв"></textarea>' +
-    '<button type="submit" class="form__button" id="form__button">Добавить</button>' +
-    '</form>' +
-    '</div>', {
-  });
+    `<ul class = "reviews">
+    {% for geoObject in properties.geoObjects %}<li><b>{{geoObject.properties.name}}</b>: {{geoObject.properties.place}}<br> {{geoObject.properties.comment}}</li>{% endfor %}
+    </ul>
+    <div class="form">
+    <form class="form" id="form">
+    <h1 class="form__title">Отзыв:</h1>
+    <input type="text" class="form__input" name="name" placeholder="Укажите ваше имя">
+    <input type="text" class="form__input" name="place" placeholder="Укажите место">
+    <textarea class="form__input form__input--textarea" name="comment" placeholder="Оставить отзыв"></textarea>
+    <button type="submit" class="form__button" id="form__button">Добавить</button>
+    </form>
+    </div>`
+    );
   var mapBalloonClick = function (e) {
     e.preventDefault();
     console.log("mapBalloonClick");
@@ -58,12 +57,10 @@ function init() {
       comment: form.elements.comment.value
     };
     var data = [];
-    let i;
     var placemark;
     // создаем новую плейсмарку
     data.push(props);
     placemark = new ymaps.Placemark(coords, {
-      //data: data,
       name: props.name,
       place: props.place,
       comment: props.comment
@@ -77,16 +74,16 @@ function init() {
 
     let placemarkArray = [];
 
-    if (localStorage.getItem('PlacemarkArray') != null) {
+    if (localStorage.getItem('PlacemarkArray') !== null) {
       placemarkArray = JSON.parse(localStorage.getItem('PlacemarkArray'));
     }
 
-    placemarkArray.push(JSON.stringify({
+    placemarkArray.push({
       coords: JSON.stringify(coords),
       name: props.name,
       place: props.place,
       comment: props.comment
-    }));
+    });
 
     localStorage.setItem('PlacemarkArray', JSON.stringify(placemarkArray));
 
@@ -95,7 +92,6 @@ function init() {
 
   //Открытие балуна при щелчке левой кнопкой мыши на карте
   map.events.add('click', function (e) {
-    if (!map.balloon.isOpen()) {
       coords = e.get('coords');
       var balloon = map.balloon.open(coords,
         '<div class="form">' +
@@ -108,10 +104,6 @@ function init() {
         '</form>' +
         '</div>'
       );
-    }
-    else {
-      map.balloon.close();
-    }
   });
 
   //Открытие хинта с подсказкой при щелчке правой кнопкой мыши
@@ -135,16 +127,14 @@ function init() {
       clusterBalloonContentLayout: clustererBalloonContentLayout,
       clusterDisableClickZoom: true,
       gridSize: 512,
-      // maxZoom: 10,
-      groupByCoordinates: true,
     }
   );
   for(let i = 0; i < placemarks.length; i++) {
-    let s = JSON.parse(placemarks[i]);
-    clusterer.add(new ymaps.Placemark(JSON.parse(s.coords), {
-      name: s.name,
-      place: s.place,
-      comment: s.comment
+    let info = placemarks[i];
+    clusterer.add(new ymaps.Placemark(JSON.parse(info.coords), {
+      name: info.name,
+      place: info.place,
+      comment: info.comment
     },//создаем плейсмарку
       {
         balloonContentLayout: BalloonContentLayout,
